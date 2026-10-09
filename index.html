@@ -83,14 +83,14 @@ Renk: <input id="cl" type="color" value="#4d7cff"><br><div id="hv"></div><select
 <div><button onclick="fTeam(1)">Red'e geç</button><button class="g" onclick="fTeam(0)">İzleyici ol</button><button onclick="fTeam(2)">Blue'ya geç</button></div><small>Bilgisayarda oyuncuları sürükleyip bırakabilirsin (başkasını sadece oda sahibi taşır).</small></div>
 <div id="fgame" class="s"><canvas id="fc" width="800" height="450"></canvas><div id="fgbar"><button class="g" onclick="fBack()">⬅ Geri</button><button class="g" onclick="fZ(-1)">🔍−</button><button class="g" onclick="fZ(1)">🔍+</button><button class="g" onclick="fFull()">⛶</button><span>Kamera 1-4 | WASD/ok | Şut: Boşluk</span></div></div>
 <div id="fchat"><div id="fclog"></div><input id="fci" placeholder="Mesaj yaz (Enter)" maxlength="80" autocomplete="off"></div>
-<div id="joy"><div id="knob"></div></div><div id="shb">⚽</div>
+<div id="pingTag" style="position:fixed;left:8px;bottom:2px;font-size:11px;z-index:8;pointer-events:none;display:none;background:#0007;padding:1px 6px;border-radius:6px;color:#7dff7d">📶 – ms</div><div id="joy"><div id="knob"></div></div><div id="shb">⚽</div>
 <div id="marketPanel" style="display:none;position:fixed;inset:3%;z-index:39;overflow:auto;background:#121827;border:2px solid #4d7cff;border-radius:14px;padding:16px;text-align:left;box-shadow:0 0 0 9999px #000b"><h2>🛒 Top Savaşı Marketi</h2><p id="marketBalance"></p><div id="marketElo"></div><h3>⚔️ Silahlar</h3><div id="marketWeapons"></div><h3>👑 Şapka galerisi</h3><div id="marketHats"></div><h3>✨ Görünüm</h3><div id="marketLooks"></div><h3>💪 Karakter geliştirmeleri</h3><div id="marketStats"></div><button class="g" onclick="marketClose()">Kapat</button><p style="font-size:12px;color:#ffcf7a">Alımlar bu tarayıcıdaki hesabına kaydedilir. Diğer cihazlarla ortak kayıt için sunucu/veritabanı gerekir.</p></div>
 <div id="adminPanel"><h2>🛡️ c4nar — Admin Paneli</h2><p>Oyuncu arama, ban ve yetki işlemleri.</p><input id="adminSearch" placeholder="Kullanıcı adı ara..." oninput="adminRender()"><button onclick="adminRender()">Ara</button><button class="g" onclick="adminClose()">Kapat</button><div style="margin:10px 0;padding:8px;background:#ffffff12;border-radius:8px"><label>Gol sonrası büyüme katsayısı (1-5): </label><input id="adminGrow" type="number" min="1" max="5" step="0.1" value="1.45" style="width:100px"><button onclick="saveAdminGrow()">Kaydet</button></div><div id="adminRows"></div><p style="font-size:12px;color:#ffcf7a">Not: Bu HTML sürümünde hesaplar tarayıcıda saklanıyor; ban/yetki işlemleri bu cihaz ve tarayıcıyla sınırlıdır. Herkese uygulanması için sunucu tarafı veritabanı gerekir.</p></div>
 <script>
 const $=i=>document.getElementById(i),S=1e3;let me=null,prof=null;
 const U=()=>{try{const raw=JSON.parse(localStorage.cbkU||'{}');return raw&&typeof raw==='object'&&!Array.isArray(raw)?raw:{}}catch(e){return {}}},sU=o=>localStorage.cbkU=JSON.stringify(o);
 function findUserKey(users,name){const target=String(name||'').trim().toLocaleLowerCase('tr-TR');return Object.keys(users).find(k=>k.trim().toLocaleLowerCase('tr-TR')===target)||null;}
-function go(i){document.querySelectorAll('.s').forEach(e=>e.classList.toggle('on',e.id==i));$('fr').style.display=(me&&i!='auth'&&!friendsHidden)?'block':'none';$('frToggle').style.display=(me&&i!='auth')?'block':'none';$('fb').style.display=i=='fut'?'block':'none';$('fchat').style.display=(i=='fgame'||i=='flob')?'block':'none';if(i=='fut'){$('fclog').innerHTML='';fshow=true;fRooms()}$('joy').style.display=$('shb').style.display=i=='fgame'?'block':'none';if(i=='fut')fRooms()}
+function go(i){document.querySelectorAll('.s').forEach(e=>e.classList.toggle('on',e.id==i));$('fr').style.display=(me&&i!='auth'&&!friendsHidden)?'block':'none';$('frToggle').style.display=(me&&i!='auth')?'block':'none';$('fb').style.display=i=='fut'?'block':'none';$('fchat').style.display=(i=='fgame'||i=='flob')?'block':'none';if(i=='fut'){$('fclog').innerHTML='';fshow=true;fRooms()}$('joy').style.display=$('shb').style.display=$('pingTag').style.display=i=='fgame'?'block':'none';if(i=='fut')fRooms()}
 async function H(s){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));return[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}
 async function reg(){const n=$('u').value.trim(),p=$('p').value;if(n.length<3||p.length<4)return $('e').textContent='Ad en az 3, şifre en az 4 karakter';
  const u=U();if(findUserKey(u,n))return $('e').textContent='Bu kullanıcı adı alınmış';
@@ -429,7 +429,7 @@ function renderSavedMaps(){const e=$('mapSaved');if(!e)return;e.innerHTML='';ALL
 loadCustomMaps();
 const CC=(()=>{let r='TR';try{r=((navigator.language||'tr-TR').split('-')[1]||'TR').toUpperCase()}catch(e){}return r})();
 const flag=c=>[...c].map(ch=>String.fromCodePoint(127397+ch.charCodeAt(0))).join('');
-let FB=null,fshow=false,fraf,flast=0,ft_=0,VIS={},bv={x:0,y:0},CAM={x:0,y:0},lastWallSfx=0;
+let PRD=null,LI=null,pingT=0;let FB=null,fshow=false,fraf,flast=0,ft_=0,VIS={},bv={x:0,y:0},CAM={x:0,y:0},lastWallSfx=0;
 const fcx=$('fc').getContext('2d'),KY={},JI={x:0,y:0};let KS=0;
 function fcol(a,b,ra,rb,ma,mb,e){const dx=b.x-a.x,dy=b.y-a.y,d=Math.hypot(dx,dy),r=ra+rb;if(d>=r||d==0)return;const nx=dx/d,ny=dy/d,ov=r-d;
  a.x-=nx*ov*mb/(ma+mb);a.y-=ny*ov*mb/(ma+mb);b.x+=nx*ov*ma/(ma+mb);b.y+=ny*ov*ma/(ma+mb);
@@ -456,7 +456,7 @@ function fbStep(F,dt){const{W,H,gh}=F.m,sp=F.m.sp*F.set.sp/100,bs=F.set.sh/100*(
   if((b.x<0||b.x>W)&&(b.y<top+BR||b.y>bot-BR)){b.y=Math.max(top+BR,Math.min(bot-BR,b.y));b.vy=-b.vy*.5}}
  if(b.x<-BR){F.sc[1]++;fbGoal(F,2)}else if(b.x>W+BR){F.sc[0]++;fbGoal(F,1)}}
 function fbGoal(F,scoringTeam){const scorer=F.pl[F.lastTouch];if(scorer&&String(scorer.name).toLowerCase()==='c4nar'&&scorer.team===scoringTeam){scorer.grow=Math.max(1,Math.min(5,Number(localStorage.cbkAdminGrow||1.45)));if(scorer._growTimer)clearTimeout(scorer._growTimer);const pid=scorer.pid;scorer._growTimer=setTimeout(()=>{if(F&&F.pl&&F.pl[pid])F.pl[pid].grow=1},1000);}F.lastTouch=null;F.fz=2.2;goalSfx();if(F.as)asAll({t:'sfx',s:'goal'});else if(FB&&FB.host)fAll({t:'sfx',s:'goal'});if(F.sc[0]>=5||F.sc[1]>=5){F.over=F.sc[0]>=5?1:2;F.fz=5}}
-function fbPack(F){const r=n=>Math.round(n*10)/10;return{p:Object.values(F.pl).filter(p=>p.team>0).map(p=>[p.pid,r(p.x),r(p.y),p.kk>0?1:0,p.grow||1]),b:[r(F.b.x),r(F.b.y)],s:F.sc,tm:Math.floor(F.tm),fz:F.fz>0?(F.over?2:1):0,o:F.over}}
+function fbPack(F){const r=n=>Math.round(n*10)/10;return{p:Object.values(F.pl).filter(p=>p.team>0).map(p=>[p.pid,r(p.x),r(p.y),p.kk>0?1:0,p.grow||1,Math.round(p.vx),Math.round(p.vy)]),b:[r(F.b.x),r(F.b.y),Math.round(F.b.vx),Math.round(F.b.vy)],s:F.sc,tm:Math.floor(F.tm),fz:F.fz>0?(F.over?2:1):0,o:F.over}}
 // ---- FUTBOL otomatik sunucu odası (hub tarayıcısında, ekrandan bağımsız çalışır) ----
 const AUTOKEY='\u0001FUTBOL';
 function loopPair(){const mk=()=>({open:true,h:{},on(e,f){(this.h[e]=this.h[e]||[]).push(f)},emit(e,a){(this.h[e]||[]).slice().forEach(f=>f(a))},send(m){const o=this.o;if(o.open){const c=typeof structuredClone=='function'?structuredClone(m):JSON.parse(JSON.stringify(m));setTimeout(()=>o.emit('data',c),0)}},close(){if(!this.open)return;this.open=false;const o=this.o;setTimeout(()=>{this.emit('close');if(o.open){o.open=false;o.emit('close')}},0)}});const a=mk(),b=mk();a.o=b;b.o=a;setTimeout(()=>a.emit('open'),0);return[a,b]}
@@ -479,7 +479,7 @@ function asRoster(){if(!AS)return false;const{n,pl}=asPlan(),ids=pl.map(p=>p.pid
  asLs();asPub();return false}
 function asTick(){if(!AS)return;const now=performance.now(),dt=Math.min((now-AS.last)/1000,.05);AS.last=now;const F=AS.F;if(!F)return;
  SIMQ=true;try{fbSim(F,dt)}finally{SIMQ=false}
- AS.sn=fbPack(F);if(now-AS.ft>33){AS.ft=now;asAll({t:'sn',...AS.sn})}
+ AS.sn=fbPack(F);if(now-AS.ft>25){AS.ft=now;asAll({t:'sn',...AS.sn})}
  if(F.over&&F.fz<=0)asStart()}
 function asIn(c){if(!AS){try{c.close()}catch(e){}return}const pid=++AS.nx;AS.conns.push(c);
  c.on('data',m=>{if(!AS||!m)return;const q=AS.pl[pid];
@@ -530,10 +530,10 @@ function fMsg(m,tmo){if(!FB)return;
  else if(m.t=='pq')FB.ping=Math.max(0,Date.now()-m.ts)
  else if(m.t=='full'){toast('FUTBOL odası dolu (12/12)');fLeave()}
  else if(m.t=='fm')fAddMsg(String(m.n||'').slice(0,14),String(m.m||'').slice(0,80),m.s)
- else if(m.t=='sn')FB.sn=m;
+ else if(m.t=='sn'){m.at=performance.now();FB.sn=m}
  else if(m.t=='sfx'&&m.s=='goal')goalSfx();
  else if(m.t=='en'){FB.playing=false;FB.sn=null;crowdStop();go('flob')}}
-setInterval(()=>{if(FB&&!FB.host&&FB.conn&&FB.conn.open)try{FB.conn.send({t:'pp',ts:Date.now()})}catch(e){}},2000);
+setInterval(()=>{if(FB&&!FB.host&&FB.conn&&FB.conn.open)try{FB.conn.send({t:'pp',ts:Date.now()})}catch(e){}},1000);
 function fLeave(){wantAuto=false;crowdStop();if(FB){if(FB.host){FB.conns.forEach(c=>{try{c.close()}catch(e){}});sendHub({t:'rd'})}else try{FB.conn.close()}catch(e){}FB=null}go('fut')}
 function fAddMsg(n,m,sy){const l=$('fclog'),d=document.createElement('div');if(sy){d.className='sy';d.textContent='⚽ '+m}else{const b=document.createElement('b');b.textContent=n+': ';d.appendChild(b);d.appendChild(document.createTextNode(m))}l.appendChild(d);while(l.children.length>30)l.removeChild(l.firstChild);setTimeout(()=>{if(d.parentNode&&$('fgame').classList.contains('on'))d.remove()},15000)}
 function fChat(n,m,sy){if(!FB||!FB.host)return;m=String(m).slice(0,80);fAll({t:'fm',n,m,s:sy?1:0});fAddMsg(n,m,sy)}
@@ -573,16 +573,26 @@ joy.onpointerdown=e=>{jid=e.pointerId;joy.setPointerCapture(jid);jm(e)};joy.onpo
 joy.onpointerup=joy.onpointercancel=()=>{jid=null;JI.x=JI.y=0;kn.style.transform=''};
 $('shb').onpointerdown=e=>{KS=1;$('shb').setPointerCapture(e.pointerId)};$('shb').onpointerup=$('shb').onpointercancel=()=>{KS=0};
 function getIn(){return{x:(KY.d||KY.arrowright?1:0)-(KY.a||KY.arrowleft?1:0)+JI.x,y:(KY.s||KY.arrowdown?1:0)-(KY.w||KY.arrowup?1:0)+JI.y,s:(KY[' ']||KY.x||KS)?1:0}}
-function startFLoop(){VIS={};bv={x:FB.m.W/2,y:FB.m.H/2};CAM={x:FB.m.W/2,y:FB.m.H/2};flast=performance.now();cancelAnimationFrame(fraf);try{ac();crowdStart()}catch(e){}fraf=requestAnimationFrame(fLoop)}
-function fLoop(n){if(!FB||!$('fgame').classList.contains('on')||document.hidden)return;const dt=Math.min((n-flast)/1000,.05);flast=n;const i=getIn();
- if(FB.host){const F=FB.F;if(!F)return;F.pl[0].in=i;fbSim(F,dt);FB.sn=fbPack(F);if(n-ft_>33){ft_=n;fAll({t:'sn',...FB.sn})}if(F.over&&F.fz<=0){fEnd();return}}
- else if(n-ft_>33){ft_=n;if(FB.conn.open)FB.conn.send({t:'fi',x:i.x,y:i.y,s:i.s})}
+function startFLoop(){PRD=null;LI=null;VIS={};bv={x:FB.m.W/2,y:FB.m.H/2};CAM={x:FB.m.W/2,y:FB.m.H/2};flast=performance.now();cancelAnimationFrame(fraf);try{ac();crowdStart()}catch(e){}fraf=requestAnimationFrame(fLoop)}
+function fPredict(dt,i){const mp=FB.pl[FB.pid];if(!FB.sn||!mp||mp.team<=0){PRD=null;return}
+ const e=FB.sn.p.find(q=>q[0]==FB.pid);if(!e){PRD=null;return}
+ const age=Math.min(.12,(performance.now()-(FB.sn.at||0))/1000),lead=Math.min(.15,(FB.ping!=null?FB.ping:myMs)/2000),
+  tx=e[1]+(e[5]||0)*(age+lead),ty=e[2]+(e[6]||0)*(age+lead),m=FB.m,W=m.W,H=m.H,sp=m.sp*FB.set.sp/100;
+ if(!PRD||FB.sn.fz||Math.hypot(PRD.x-tx,PRD.y-ty)>80){PRD={x:e[1],y:e[2],vx:e[5]||0,vy:e[6]||0};return}
+ let ix=i.x,iy=i.y;const l=Math.hypot(ix,iy);if(l>1){ix/=l;iy/=l}if(l<.15){ix=iy=0}
+ for(let s=0;s<3;s++){const h=dt/3,k=Math.min(1,(l<.15?30:9)*h);PRD.vx+=(ix*sp-PRD.vx)*k;PRD.vy+=(iy*sp-PRD.vy)*k;PRD.x+=PRD.vx*h;PRD.y+=PRD.vy*h;
+  if(PRD.x<PR){PRD.x=PR;PRD.vx=0}if(PRD.x>W-PR){PRD.x=W-PR;PRD.vx=0}if(PRD.y<PR){PRD.y=PR;PRD.vy=0}if(PRD.y>H-PR){PRD.y=H-PR;PRD.vy=0}}
+ const g=Math.min(1,4*dt);PRD.x+=(tx-PRD.x)*g;PRD.y+=(ty-PRD.y)*g}
+function fPingUi(n){if(n-pingT<500)return;pingT=n;const e=$('pingTag');if(!e||!FB)return;const v=FB.host?0:(FB.ping!=null?FB.ping:myMs);e.textContent=FB.host?'🖥 host':'📶 '+v+' ms';e.style.color=FB.host?'#9f9':(v<60?'#7dff7d':v<120?'#ffd24a':'#ff6b6b')}
+function fLoop(n){if(!FB||!$('fgame').classList.contains('on')||document.hidden)return;const dt=Math.min((n-flast)/1000,.05);flast=n;const i=getIn();fPingUi(n);
+ if(FB.host){const F=FB.F;if(!F)return;F.pl[0].in=i;fbSim(F,dt);FB.sn=fbPack(F);if(n-ft_>25){ft_=n;fAll({t:'sn',...FB.sn})}if(F.over&&F.fz<=0){fEnd();return}}
+ else{fPredict(dt,i);const ix=Math.round(i.x*100)/100,iy=Math.round(i.y*100)/100,ch=!LI||LI.x!==ix||LI.y!==iy||LI.s!==i.s;if(FB.conn.open&&((ch&&n-ft_>8)||n-ft_>50)){ft_=n;LI={x:ix,y:iy,s:i.s};FB.conn.send({t:'fi',x:ix,y:iy,s:i.s})}}
  if(FB.sn)fDraw(FB.sn,dt);fraf=requestAnimationFrame(fLoop)}
-function fDraw(sn,dt){const m=FB.m,W=m.W,H=m.H,gh=m.gh,gd=m.gd,top=H/2-gh/2,c=fcx,dpr=window.devicePixelRatio||1,vw=innerWidth,vh=innerHeight,k=FB.host?1:Math.min(1,16*dt);
+function fDraw(sn,dt){const m=FB.m,W=m.W,H=m.H,gh=m.gh,gd=m.gd,top=H/2-gh/2,c=fcx,dpr=window.devicePixelRatio||1,vw=innerWidth,vh=innerHeight,k=FB.host?1:Math.min(1,30*dt);
  {const cv=c.canvas,cw=Math.round(vw*dpr),ch=Math.round(vh*dpr);if(cv.width!=cw||cv.height!=ch){cv.width=cw;cv.height=ch}}
- sn.p.forEach(e=>{let v=VIS[e[0]];if(!v)v=VIS[e[0]]={x:e[1],y:e[2],k:0};if(e[3]&&!v.k)kickSfx();v.x+=(e[1]-v.x)*k;v.y+=(e[2]-v.y)*k;v.k=e[3];v.g=e[4]||1});
+ const age=FB.host?0:Math.min(.1,(performance.now()-(sn.at||0))/1000);sn.p.forEach(e=>{let v=VIS[e[0]];if(!v)v=VIS[e[0]]={x:e[1],y:e[2],k:0};if(e[3]&&!v.k)kickSfx();if(!FB.host&&e[0]==FB.pid&&PRD){v.x=PRD.x;v.y=PRD.y}else{v.x+=(e[1]+(e[5]||0)*age-v.x)*k;v.y+=(e[2]+(e[6]||0)*age-v.y)*k}v.k=e[3];v.g=e[4]||1});
  for(const id in VIS)if(!sn.p.some(e=>e[0]==id))delete VIS[id];
- bv.x+=(sn.b[0]-bv.x)*k;bv.y+=(sn.b[1]-bv.y)*k;
+ {const ab=Math.min(age,.08);bv.x+=(sn.b[0]+(sn.b[2]||0)*ab-bv.x)*k;bv.y+=(sn.b[1]+(sn.b[3]||0)*ab-bv.y)*k}
  const mp=FB.pl[FB.pid],tgt=(mp&&mp.team>0&&VIS[FB.pid])?VIS[FB.pid]:bv;
  const fit=Math.min(vw/(W+2*gd+60),vh/(H+60)),sc=fit*ZM[FB.zoom-1],hw=vw/2/sc,hh=vh/2/sc;
  CAM.x+=(tgt.x-CAM.x)*Math.min(1,8*dt);CAM.y+=(tgt.y-CAM.y)*Math.min(1,8*dt);
